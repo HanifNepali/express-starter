@@ -1,7 +1,9 @@
-const dotenv = require("dotenv");
-const cors = require("cors");
-const connectDB = require("./config/db");
 const express = require("express");
+const cors = require("cors");
+
+const { connectDB } = require("./config/db");
+const dotenv = require("dotenv");
+dotenv.config();
 
 // middleware
 const routeNotFound = require("./middleware/routeNotFound");
@@ -10,12 +12,12 @@ const routeNotFound = require("./middleware/routeNotFound");
 const app = express();
 
 // execute dotenv's config
-dotenv.config();
+// dotenv.config();
 
 // add cors options
 // allow only the local client for now
 var corsOptions = {
-    origin: "http://localhost:3000",
+    origin: process.env.ALLOWED_ORIGIN,
     credentials: true,
 };
 
@@ -27,13 +29,14 @@ app.use(cors(corsOptions));
 
 // ROUTES
 app.use("/api/auth", require("./routes/api/authRoutes"));
+app.use("/api/users", require("./routes/api/userRoutes"));
 // include more routes here
 
 // 404 Page for all other requests
 app.use(routeNotFound);
 
 // port setup
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8000;
 
 // start Server
 const startServer = async () => {
