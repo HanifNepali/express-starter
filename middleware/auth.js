@@ -1,18 +1,33 @@
+const jwt = require("jsonwebtoken");
+
 const requireAuth = async (req, res, next) => {
+    // Get cookie token from request
+    const token = req.cookies?.token || "";
+
+    // Check for token
+    if (!token) {
+        return res
+            .status(401)
+            .json({ msg: "No user logged in. Authorization denied" });
+    }
+
     try {
-        // console log req for dummy purpose
-        console.log(req);
+        // Verify token
+        jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+            if (error) {
+                res.cookie("token", "", { httpOnly: true });
 
-        // authentication code goes here
-
-        // call the next handler function
-        next();
+                return res
+                    .status(401)
+                    .cookie("token", "", { httpOnly: true })
+                    .json({ msg: "Invalid token" });
+            }
+            req.userId = decoded.userId;
+            next();
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ msg: "Server Error" });
+        res.status(500).json({ msg: "Internal server error" });
     }
 };
 
-module.exports = {
-    requireAuth,
-};
+module.exports = { requireAuth };

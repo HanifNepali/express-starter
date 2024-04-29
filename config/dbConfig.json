@@ -4,21 +4,24 @@
       "password": "postgres",
       "database": "express_starter",
       "host": "localhost",
-      "dialect": "postgres"
+      "dialect": "postgres",
+      "logging": false
     },
     "test": {    
       "username": "postgres",
       "password": "postgres",
       "database": "express_starter",
       "host": "localhost",
-      "dialect": "postgres"
+      "dialect": "postgres",
+      "logging": false
     },
     "production": {    
       "username": "postgres",
       "password": "postgres",
       "database": "express_starter",
       "host": "localhost",
-      "dialect": "postgres"
+      "dialect": "postgres",
+      "logging": false
     }
   }
   

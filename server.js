@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const { connectDB } = require("./config/db");
 const dotenv = require("dotenv");
@@ -21,11 +22,14 @@ var corsOptions = {
     credentials: true,
 };
 
-// express middleware
+// express middlewares
+
 // to parse incoming request bodies in JSON format.
 app.use(express.json());
 // to allow requests from selective origins
 app.use(cors(corsOptions));
+// to parse cookies in header
+app.use(cookieParser());
 
 // ROUTES
 app.use("/api/auth", require("./routes/api/authRoutes"));

@@ -4,6 +4,11 @@ const User = require("../models/User");
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
+        if (!users.length) {
+            res.status(404).json({ msg: "No users found" });
+            return;
+        }
+
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ msg: "Unable to fetch all users" });
@@ -14,49 +19,36 @@ const getAllUsers = async (req, res) => {
 const getUser = async (req, res) => {
     try {
         const id = req.params.userId;
+        // Find existing user
         const user = await User.findByPk(id);
-        if (user) {
-            res.status(200).json(user);
-        } else {
+        if (!user) {
             res.status(404).json({ msg: "User not found" });
+            return;
         }
+
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ msg: "Unable to fetch the user" });
     }
 };
 
-// Create single user
-// TODO - Remove this route and replace with "/register" endpoint logic
-const createUser = async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-    try {
-        const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            password,
-        });
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(500).json({ msg: "Unable to create the user" });
-    }
-};
-
 // Update user
 const updateUser = async (req, res) => {
-    const id = req.params.userId;
-
     try {
+        const id = req.params.userId;
         // Find existing user
         const user = await User.findByPk(id);
+        if (!user) {
+            res.status(404).json({ msg: "User not found" });
+            return;
+        }
 
         // Update existing user
         await user.update(req.body);
 
         // Return updated user
-        const updateUser = await User.findByPk(id);
-
-        res.status(201).json(updateUser);
+        const updatedUser = await User.findByPk(id);
+        res.status(201).json(updatedUser);
     } catch (error) {
         res.status(500).json({ msg: "Unable to update the user" });
     }
@@ -66,14 +58,18 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const id = req.params.userId;
+        // Find existing user
         const user = await User.findByPk(id);
-        if (user) {
-            await user.destroy();
-            res.status(201).json({ msg: "User deleted successfully" });
-        } else {
+        if (!user) {
             res.status(404).json({ msg: "User not found" });
+            return;
         }
-    } catch (error) {}
+
+        await user.destroy();
+        res.status(201).json({ msg: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ msg: "Unable to delete the user" });
+    }
 };
 
-module.exports = { getAllUsers, getUser, createUser, updateUser, deleteUser };
+module.exports = { getAllUsers, getUser, updateUser, deleteUser };
