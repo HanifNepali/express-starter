@@ -1,4 +1,7 @@
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
+
+const { logger } = require("./logger");
 
 const requireAuth = async (req, res, next) => {
     // Get cookie token from request
@@ -6,27 +9,23 @@ const requireAuth = async (req, res, next) => {
 
     // Check for token
     if (!token) {
-        return res
-            .status(401)
-            .json({ msg: "No user logged in. Authorization denied" });
+        logger.warn("Authorization - No user logged in");
+        throw createError(401, "No user logged in. Authorization denied");
     }
 
     try {
         // Verify token
         jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
             if (error) {
-                res.cookie("token", "", { httpOnly: true });
-
-                return res
-                    .status(401)
-                    .cookie("token", "", { httpOnly: true })
-                    .json({ msg: "Invalid token" });
+                logger.warn("Authorization - Invalid token");
+                throw createError(401, "Authorization - Invalid token");
             }
             req.userId = decoded.userId;
             next();
         });
-    } catch (err) {
-        res.status(500).json({ msg: "Internal server error" });
+    } catch (error) {
+        logger.error("Authorization Error", error);
+        next(error);
     }
 };
 

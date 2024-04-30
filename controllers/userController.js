@@ -1,34 +1,36 @@
+const createError = require("http-errors");
+
 const User = require("../models/User");
+const { logger } = require("../middleware/logger");
 
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
         if (!users.length) {
-            res.status(404).json({ msg: "No users found" });
-            return;
+            logger.warn("User not found");
+            throw createError(404, "Users not found");
         }
-
         res.status(200).json(users);
     } catch (error) {
-        res.status(500).json({ msg: "Unable to fetch all users" });
+        next(error);
     }
 };
 
 // Get single user
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
     try {
         const id = req.params.userId;
         // Find existing user
         const user = await User.findByPk(id);
         if (!user) {
-            res.status(404).json({ msg: "User not found" });
-            return;
+            logger.warn("User not found");
+            throw createError(404, "User not found");
         }
 
         res.status(200).json(user);
     } catch (error) {
-        res.status(500).json({ msg: "Unable to fetch the user" });
+        next(error);
     }
 };
 
@@ -39,8 +41,8 @@ const updateUser = async (req, res) => {
         // Find existing user
         const user = await User.findByPk(id);
         if (!user) {
-            res.status(404).json({ msg: "User not found" });
-            return;
+            logger.warn("User not found");
+            throw createError(404, "User not found");
         }
 
         // Update existing user
@@ -50,7 +52,7 @@ const updateUser = async (req, res) => {
         const updatedUser = await User.findByPk(id);
         res.status(201).json(updatedUser);
     } catch (error) {
-        res.status(500).json({ msg: "Unable to update the user" });
+        next(error);
     }
 };
 
@@ -61,14 +63,15 @@ const deleteUser = async (req, res) => {
         // Find existing user
         const user = await User.findByPk(id);
         if (!user) {
-            res.status(404).json({ msg: "User not found" });
-            return;
+            logger.warn("User not found");
+            throw createError(404, "User not found");
         }
 
+        // Delete user
         await user.destroy();
         res.status(201).json({ msg: "User deleted successfully" });
     } catch (error) {
-        res.status(500).json({ msg: "Unable to delete the user" });
+        next(error);
     }
 };
 

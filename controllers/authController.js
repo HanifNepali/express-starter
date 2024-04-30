@@ -1,7 +1,9 @@
 const bcrypt = require("bcrypt");
+const createError = require("http-errors");
 
 const User = require("../models/User");
 const { createToken } = require("../utils/token");
+const { logger } = require("../middleware/logger");
 
 // handler function for user registration
 const register = async (req, res) => {
@@ -13,7 +15,8 @@ const register = async (req, res) => {
             where: { email: email.toLowerCase() },
         });
         if (user) {
-            return res.status(400).json({ msg: "User already exists" });
+            logger.warn("User already exists");
+            throw createError(400, "User already exists");
         }
 
         // Build a new user
@@ -38,8 +41,9 @@ const register = async (req, res) => {
         res.status(200)
             .cookie("token", token, { httpOnly: true })
             .json({ msg: "Registration successful" });
-    } catch (err) {
-        res.status(500).json({ msg: "Unable to register user" });
+    } catch (error) {
+        logger.error("Unable to register user");
+        next(error);
     }
 };
 
@@ -53,18 +57,14 @@ const login = async (req, res) => {
             where: { email: email.toLowerCase() },
         });
         if (!user) {
-            return res
-                .status(404)
-                .cookie("token", "", { httpOnly: true })
-                .json({ msg: "Invalid Email" });
+            logger.warn("Invalid email during user registration");
+            throw createError(400, "Invalid email");
         }
         // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res
-                .status(404)
-                .cookie("token", "", { httpOnly: true })
-                .json({ msg: "Invalid Password" });
+            logger.warn("Invalid password during user registration");
+            throw createError(400, "Invalid password");
         }
 
         // Generate a token
@@ -74,8 +74,9 @@ const login = async (req, res) => {
         res.status(200)
             .cookie("token", token, { httpOnly: true })
             .json({ msg: "Login successful" });
-    } catch (err) {
-        res.status(500).json({ msg: "Unable to login" });
+    } catch (error) {
+        logger.error("Unable to login");
+        next(error);
     }
 };
 

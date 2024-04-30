@@ -12,8 +12,8 @@ const createToken = async (userId) => {
             expiresIn: maxAge,
         });
         return token;
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        throw error;
     }
 };
 

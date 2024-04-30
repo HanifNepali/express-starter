@@ -1,14 +1,10 @@
+const { logger } = require("./logger");
+
 const routeNotFound = (req, res) => {
-    // console log the request
-    console.log(req);
-
-    const err = new Error("Requested page does not exist");
-    err.status = 404;
-
-    res.send({
+    logger.warn("Requested page not found");
+    res.status(404).json({
         error: {
-            status: err.status || 500,
-            errorMsg: err.message,
+            message: "Request page not found",
         },
     });
 };
