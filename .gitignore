@@ -2,3 +2,4 @@
 package-lock.json
 .env
 logs
+config/dbConfig.json
